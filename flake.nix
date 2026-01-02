@@ -95,14 +95,16 @@
         ];
       };
 
-      # NOTE: lazy doesnt care if these are in startupPlugins or optionalPlugins
+      # NOTE: lze doesn't care if these are in startupPlugins or optionalPlugins
       # also you dont have to download everything via nix if you dont want.
       # but you have the option, and that is demonstrated here.
       startupPlugins = with pkgs.vimPlugins; {
         general = [
-          # LazyVim
-          lazy-nvim
-          LazyVim
+          # lze - lightweight plugin manager
+          lze
+          # Colorschemes
+          nightfox-nvim
+          tokyonight-nvim
           bufferline-nvim
           lazydev-nvim
           conform-nvim
@@ -125,7 +127,6 @@
           telescope-fzf-native-nvim
           telescope-nvim
           todo-comments-nvim
-          tokyonight-nvim
           trouble-nvim
           vim-illuminate
           vim-startuptime
@@ -141,20 +142,29 @@
           #   ]
           # ))
 
+          # Additional plugins for quarto, rendering, etc
+          quarto-nvim
+          otter-nvim
+          jupytext-nvim
+          render-markdown-nvim
+          
+          # File explorer
+          neo-tree-nvim
+
           # sometimes you have to fix some names
           { plugin = catppuccin-nvim; name = "catppuccin"; }
           { plugin = mini-ai; name = "mini.ai"; }
           { plugin = mini-icons; name = "mini.icons"; }
           { plugin = mini-pairs; name = "mini.pairs"; }
-          # you could do this within the lazy spec instead if you wanted
+          # you could do this within the lze spec instead if you wanted
           # and get the new names from `:NixCats pawsible` debug command
         ];
       };
 
       # not loaded automatically at startup.
       # use with packadd and an autocommand in config to achieve lazy loading
-      # NOTE: this template is using lazy.nvim so, which list you put them in is irrelevant.
-      # startupPlugins or optionalPlugins, it doesnt matter, lazy.nvim does the loading.
+      # NOTE: this template is using lze so, which list you put them in is irrelevant.
+      # startupPlugins or optionalPlugins, it doesnt matter, lze does the loading.
       # I just put them all in startupPlugins. I could have put them all in here instead.
       optionalPlugins = {};
 

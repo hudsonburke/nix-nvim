@@ -1,1 +1,7 @@
-return { { "tweag/topiary" } }
+-- lze topiary configuration
+return {
+  {
+    "tweag/topiary",
+    cmd = { "Topiary" },
+  },
+}

@@ -1,9 +1,10 @@
+-- lze colorscheme configuration
 return {
-  { "EdenEast/nightfox.nvim" },
   {
-    "LazyVim/LazyVim",
-    opts = {
-      colorscheme = "nightfox",
-    },
+    "EdenEast/nightfox.nvim",
+    priority = 1000,
+    after = function()
+      vim.cmd.colorscheme("nightfox")
+    end,
   },
 }

@@ -1,28 +1,36 @@
--- plugins/quarto.lua
+-- lze quarto configuration
 return {
   {
     "quarto-dev/quarto-nvim",
-    dependencies = {
-      "jmbuhr/otter.nvim",
-      "nvim-treesitter/nvim-treesitter",
-    },
+    ft = { "quarto", "qmd" },
+    after = function()
+      require("quarto").setup({})
+    end,
   },
-  { -- directly open ipynb files as quarto docuements
+  {
+    "jmbuhr/otter.nvim",
+    ft = { "quarto", "qmd" },
+  },
+  {
+    -- directly open ipynb files as quarto documents
     -- and convert back behind the scenes
     "GCBallesteros/jupytext.nvim",
-    opts = {
-      custom_language_formatting = {
-        python = {
-          extension = "qmd",
-          style = "quarto",
-          force_ft = "quarto",
+    ft = { "ipynb" },
+    after = function()
+      require("jupytext").setup({
+        custom_language_formatting = {
+          python = {
+            extension = "qmd",
+            style = "quarto",
+            force_ft = "quarto",
+          },
+          r = {
+            extension = "qmd",
+            style = "quarto",
+            force_ft = "quarto",
+          },
         },
-        r = {
-          extension = "qmd",
-          style = "quarto",
-          force_ft = "quarto",
-        },
-      },
-    },
+      })
+    end,
   },
 }

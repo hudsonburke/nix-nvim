@@ -6,45 +6,43 @@ require('nixCatsUtils').setup {
   non_nix_value = true,
 }
 
--- NOTE: You might want to move the lazy-lock.json file
-local function getlockfilepath()
-  if require('nixCatsUtils').isNixCats and type(nixCats.settings.unwrappedCfgPath) == 'string' then
-    return nixCats.settings.unwrappedCfgPath .. '/lazy-lock.json'
-  else
-    return vim.fn.stdpath 'config' .. '/lazy-lock.json'
-  end
-end
-local lazyOptions = {
-  lockfile = getlockfilepath(),
-}
+-- NOTE: Load options and keymaps
+require('config.options')
+require('config.keymaps')
+require('config.autocmds')
 
--- NOTE: this the lazy wrapper. Use it like require('lazy').setup() but with an extra
--- argument, the path to lazy.nvim as downloaded by nix, or nil, before the normal arguments.
-require('nixCatsUtils.lazyCat').setup(nixCats.pawsible { 'allPlugins', 'start', 'lazy.nvim' }, {
-  { 'LazyVim/LazyVim', import = 'lazyvim.plugins' },
-  -- disable mason.nvim while using nix
-  -- precompiled binaries do not agree with nixos, and we can just make nix install this stuff for us.
-  { 'mason-org/mason-lspconfig.nvim', enabled = require('nixCatsUtils').lazyAdd(true, false) },
-  { 'mason-org/mason.nvim', enabled = require('nixCatsUtils').lazyAdd(true, false) },
-  {
-    'nvim-treesitter/nvim-treesitter',
-    build = require('nixCatsUtils').lazyAdd ':TSUpdate',
-    opts_extend = require('nixCatsUtils').lazyAdd(nil, false),
-    opts = {
-      -- nix already ensured they were installed, and we would need to change the parser_install_dir if we wanted to use it instead.
-      -- so we just disable install and do it via nix.
-      ensure_installed = require('nixCatsUtils').lazyAdd({ 'bash', 'c', 'diff', 'html', 'lua', 'luadoc', 'markdown', 'vim', 'vimdoc' }, false),
-      auto_install = require('nixCatsUtils').lazyAdd(true, false),
-    },
-  },
-  {
-    'folke/lazydev.nvim',
-    opts = {
-      library = {
-        { path = (nixCats.nixCatsPath or '') .. '/lua', words = { 'nixCats' } },
-      },
-    },
-  },
-  -- import/override with your plugins
-  { import = 'plugins' },
-}, lazyOptions)
+-- NOTE: Configure treesitter (already loaded by nix, just needs setup)
+if nixCats('general') then
+  require("nvim-treesitter.configs").setup({
+    -- nix already ensured they were installed, completely disable all installation features
+    ensure_installed = {},
+    auto_install = false,
+    sync_install = false,
+    update = false,
+    install = false,
+    highlight = { enable = true },
+    indent = { enable = true },
+  })
+  -- Override the TSUpdate command to do nothing
+  vim.api.nvim_create_user_command("TSUpdate", function()
+    vim.notify("TSUpdate disabled - treesitter grammars are managed by nix", vim.log.levels.INFO)
+  end, {})
+end
+
+-- NOTE: register the nixCats for_cat handler for lze
+-- this makes it easy to conditionally enable plugins based on categories
+require("lze").register_handlers(require('nixCatsUtils.lzUtils').for_cat)
+
+-- NOTE: Load lze plugins
+require('lze').load(require('config.lze'))
+
+-- NOTE: Load colorscheme after plugins are loaded
+local colorschemeName = nixCats('colorscheme')
+if not require('nixCatsUtils').isNixCats then
+  colorschemeName = 'nightfox'
+end
+-- Use pcall in case the colorscheme isn't available
+local ok = pcall(vim.cmd.colorscheme, colorschemeName or "nightfox")
+if not ok then
+  vim.notify("Colorscheme '" .. (colorschemeName or "nightfox") .. "' not found, using default", vim.log.levels.WARN)
+end
